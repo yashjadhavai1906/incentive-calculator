@@ -208,21 +208,23 @@
               {/* Bonus */}
               <div style={{ padding: "18px 20px" }}>
                 <SectionLabel>Bonus Eligibility</SectionLabel>
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 13, color: "#3d5140", fontWeight: 500, marginBottom: 8 }}>DI / Cheque cut done this month?</div>
-                  <div style={{ display: "flex", gap: 20 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", fontSize: 13, color: "#3d5140", fontWeight: di === true ? 700 : 400 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 14, flexWrap: "nowrap" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, color: "#3d5140", fontWeight: 500 }}>DI / Cheque cut done this month?</div>
+                    {di === true && <div style={{ fontSize: 11, color: G, marginTop: 2, fontWeight: 600 }}>+ ₹1,000 bonus</div>}
+                  </div>
+                  <div style={{ display: "flex", gap: 14, flexShrink: 0 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, color: "#3d5140", fontWeight: di === true ? 700 : 400, whiteSpace: "nowrap" }}>
                       <input type="radio" name="di" checked={di === true} onChange={() => setDi(true)}
-                        style={{ accentColor: G, width: 16, height: 16, cursor: "pointer" }} />
+                        style={{ accentColor: G, width: 15, height: 15, cursor: "pointer", flexShrink: 0 }} />
                       Yes
                     </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", fontSize: 13, color: "#3d5140", fontWeight: di === false ? 700 : 400 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, color: "#3d5140", fontWeight: di === false ? 700 : 400, whiteSpace: "nowrap" }}>
                       <input type="radio" name="di" checked={di === false} onChange={() => setDi(false)}
-                        style={{ accentColor: G, width: 16, height: 16, cursor: "pointer" }} />
+                        style={{ accentColor: G, width: 15, height: 15, cursor: "pointer", flexShrink: 0 }} />
                       No
                     </label>
                   </div>
-                  {di === true && <div style={{ fontSize: 11, color: G, marginTop: 6, fontWeight: 600 }}>+ ₹1,000 bonus</div>}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ flex: 1 }}>
