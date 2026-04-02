@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PeopleHome Incentive Calculator</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f3f7f3; min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const G = "#2d7a3a";
+    const Y = "#f5a800";
+    const G2 = "#edf7ee";
+
+    const MoneyInput = ({ label, value, onChange, placeholder, highlight }) => {
+      const format = (v) => {
+        if (!v) return "";
+        const n = v.toString().replace(/,/g, "");
+        if (isNaN(n)) return v;
+        return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
+      };
+      const handle = (e) => {
+        const raw = e.target.value.replace(/,/g, "");
+        if (/^\d*\.?\d*$/.test(raw)) onChange(raw);
+      };
+      return (
+        <div>
+          {label && <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#5a6a5c", marginBottom: 5 }}>{label}</label>}
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontWeight: 700, fontSize: 14 }}>₹</span>
+            <input
+              type="text" inputMode="numeric"
+              value={format(value)} onChange={handle}
+              placeholder={placeholder || "0"}
+              style={{
+                width: "100%", paddingLeft: 26, paddingRight: 10,
+                height: 40, border: highlight ? `1.5px solid ${G}` : "1px solid #dde8de",
+                borderRadius: 8, background: highlight ? G2 : "#f7faf7",
+                fontSize: 14, color: "#1a2e1c", outline: "none"
+              }}
+            />
+          </div>
+        </div>
+      );
+    };
+
+    const Divider = () => <div style={{ height: 1, background: "#eef4ef", margin: "12px 0" }} />;
+
+    const SectionLabel = ({ children }) => (
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>{children}</div>
+    );
+
+    const ToggleBtn = ({ active, onClick, children }) => (
+      <button onClick={onClick} style={{
+        flex: 1, height: 32, fontSize: 13, fontWeight: active ? 700 : 400,
+        border: "none", borderRadius: 7, cursor: "pointer",
+        background: active ? G : "transparent", color: active ? "#fff" : "#7a8e7c",
+      }}>{children}</button>
+    );
+
+    function getFsBonus(count) {
+      const n = parseInt(count) || 0;
+      if (n <= 0) return 0;
+      if (n === 1) return 1000;
+      return 2000;
+    }
+
+    const fmt = (n) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+    const parse = (v) => parseFloat((v || "0").toString().replace(/,/g, "")) || 0;
+    const calcWeighted = (d, c, i, co) => d * 1 + c * 0.5 + i * 0.25 + co * 0.1;
+
+    function rmSlab(cho) {
+      if (cho < 1000000) return null;
+      if (cho < 1500000) return { pct: 0.30, label: "T1 · 0.30%" };
+      if (cho < 2000000) return { pct: 0.50, label: "T2 · 0.50%" };
+      if (cho < 2500000) return { pct: 0.60, label: "T3 · 0.60%" };
+      if (cho < 3500000) return { pct: 0.70, label: "T4 · 0.70%" };
+      return { pct: 0.80, label: "T5 · 0.80%" };
+    }
+
+    function smSlab(cho) {
+      if (cho < 1500000) return null;
+      if (cho < 2000000) return { pct: 0.30, label: "T1 · 0.30%" };
+      if (cho < 3000000) return { pct: 0.50, label: "T2 · 0.50%" };
+      if (cho < 3500000) return { pct: 0.60, label: "T3 · 0.60%" };
+      if (cho < 4500000) return { pct: 0.70, label: "T4 · 0.70%" };
+      return { pct: 0.80, label: "T5 · 0.80%" };
+    }
+
+    function App() {
+      const [role, setRole] = React.useState("rm");
+      const [cho, setCho] = React.useState("");
+      const [direct, setDirect] = React.useState("");
+      const [connector, setConnector] = React.useState("");
+      const [idsa, setIdsa] = React.useState("");
+      const [cdsa, setCdsa] = React.useState("");
+      const [di, setDi] = React.useState(false);
+      const [fsCount, setFsCount] = React.useState("");
+      const [result, setResult] = React.useState(null);
+      const [error, setError] = React.useState("");
+      const [mismatch, setMismatch] = React.useState(false);
+      const [copied, setCopied] = React.useState(false);
+
+      const calculate = () => {
+        setError(""); setResult(null);
+        const choVal = parse(cho);
+        const d = parse(direct), c = parse(connector), i = parse(idsa), co = parse(cdsa);
+        const diBonus = di ? 1000 : 0;
+        const fsBonus = getFsBonus(fsCount);
+        const fsFiles = Math.min(parseInt(fsCount) || 0, 2);
+        if (!choVal && !diBonus && !fsBonus) { setError("Please enter CHO amount or select a bonus."); return; }
+        const sum = d + c + i + co;
+        setMismatch(choVal > 0 && sum > 0 && Math.abs(sum - choVal) > 1);
+        const w = calcWeighted(d, c, i, co);
+        const slab = choVal > 0 ? (role === "rm" ? rmSlab(choVal) : smSlab(choVal)) : null;
+        const inc = slab ? Math.round(w * slab.pct / 100) : 0;
+        setResult({ role, w, slab, inc, diBonus, fsBonus, fsFiles, total: inc + diBonus + fsBonus,
+          bd: { d: d * 1, c: c * 0.5, i: i * 0.25, co: co * 0.1 } });
+      };
+
+      const reset = () => {
+        setCho(""); setDirect(""); setConnector(""); setIdsa(""); setCdsa("");
+        setDi(false); setFsCount(""); setResult(null); setError(""); setMismatch(false); setCopied(false);
+      };
+
+      const copy = () => {
+        if (!result) return;
+        const t = `PeopleHome FOS Incentive\nRole: ${result.role === "rm" ? "RM/DST/RO" : "SM/SRO"}\nWeighted CHO: ${fmt(result.w)}\nSlab: ${result.slab?.label || "Below T1"}\nBase Incentive: ${fmt(result.inc)}\nBonuses: ${fmt(result.diBonus + result.fsBonus)}\nTotal Payable: ${fmt(result.total)}`;
+        navigator.clipboard.writeText(t).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {});
+      };
+
+      return (
+        <div style={{ minHeight: "100vh", background: "#f3f7f3", padding: "20px 16px" }}>
+          <div style={{ maxWidth: 540, margin: "0 auto" }}>
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                  <div style={{ background: G, borderRadius: 8, padding: "6px 8px", display: "flex", alignItems: "center" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8M8 12h5M8 17h3"/></svg>
+                  </div>
+                  <span style={{ fontSize: 17, fontWeight: 700, color: "#1a2e1c" }}>Incentive Calculator</span>
+                </div>
+                <p style={{ fontSize: 12, color: "#8fa88f", margin: 0, paddingLeft: 40 }}>FOS Incentive Structure</p>
+              </div>
+              <img src="Logo.png" alt="PeopleHome" style={{ height: 40, objectFit: "contain" }} />
+            </div>
+
+            {/* Main Card */}
+            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #dde8de", overflow: "hidden", marginBottom: 12 }}>
+
+              {/* Role */}
+              <div style={{ padding: "18px 20px", borderBottom: "1px solid #eef4ef" }}>
+                <SectionLabel>Role</SectionLabel>
+                <div style={{ position: "relative" }}>
+                  <select value={role} onChange={e => setRole(e.target.value)} style={{
+                    width: "100%", height: 42, paddingLeft: 14, paddingRight: 36,
+                    border: "1px solid #dde8de", borderRadius: 8, background: "#f7faf7",
+                    fontSize: 14, fontWeight: 600, color: "#1a2e1c", appearance: "none", cursor: "pointer"
+                  }}>
+                    <option value="rm">RM / DST / RO</option>
+                    <option value="sm">SM / SRO</option>
+                  </select>
+                  <svg style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8fa88f" strokeWidth="2"><path d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+
+              {/* CHO */}
+              <div style={{ padding: "18px 20px", background: G2, borderBottom: "1px solid #dde8de" }}>
+                <SectionLabel>Cheque Handover Business</SectionLabel>
+                <MoneyInput label="Total CHO Amount" value={cho} onChange={setCho} placeholder="25,00,000" highlight />
+                <p style={{ fontSize: 11, color: G, marginTop: 6, marginBottom: 0, fontWeight: 500 }}>Determines your payout slab</p>
+              </div>
+
+              {/* Bifurcation */}
+              <div style={{ padding: "18px 20px", borderBottom: "1px solid #eef4ef" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <SectionLabel>Business Bifurcation</SectionLabel>
+                  {mismatch && <span style={{ fontSize: 11, color: "#c97b00", fontWeight: 600 }}>⚠ Doesn't match CHO</span>}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {[
+                    { label: "Direct", pct: "100%", val: direct, set: setDirect },
+                    { label: "Connector", pct: "50%", val: connector, set: setConnector },
+                    { label: "Individual DSA", pct: "25%", val: idsa, set: setIdsa },
+                    { label: "Corporate DSA", pct: "10%", val: cdsa, set: setCdsa },
+                  ].map(({ label, pct, val, set }) => (
+                    <div key={label}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#5a6a5c", marginBottom: 4 }}>
+                        {label} <span style={{ color: Y, fontWeight: 700 }}>{pct}</span>
+                      </div>
+                      <MoneyInput value={val} onChange={set} />
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: 11, color: "#8fa88f", marginTop: 10, marginBottom: 0 }}>Weighted business is the payout base</p>
+              </div>
+
+              {/* Bonus */}
+              <div style={{ padding: "18px 20px" }}>
+                <SectionLabel>Bonus Eligibility</SectionLabel>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                  <div>
+                    <div style={{ fontSize: 13, color: "#3d5140", fontWeight: 500 }}>DI / Cheque cut done this month?</div>
+                    {di && <div style={{ fontSize: 11, color: G, marginTop: 2 }}>+ ₹1,000 bonus</div>}
+                  </div>
+                  <div style={{ display: "flex", gap: 3, background: "#eef4ef", padding: 3, borderRadius: 9, minWidth: 100 }}>
+                    <ToggleBtn active={di} onClick={() => setDi(true)}>Yes</ToggleBtn>
+                    <ToggleBtn active={!di} onClick={() => setDi(false)}>No</ToggleBtn>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, color: "#3d5140", fontWeight: 500, marginBottom: 3 }}>How many files final sanctioned?</div>
+                    <div style={{ fontSize: 11, color: "#8fa88f" }}>₹1,000 per file · max 2 files (₹2,000)</div>
+                  </div>
+                  <input
+                    type="number" min="0"
+                    value={fsCount}
+                    onChange={e => setFsCount(e.target.value)}
+                    placeholder="0"
+                    style={{
+                      width: 80, height: 40, textAlign: "center",
+                      border: "1px solid #dde8de", borderRadius: 8, background: "#f7faf7",
+                      fontSize: 16, fontWeight: 700, color: "#1a2e1c", outline: "none"
+                    }}
+                  />
+                </div>
+                {parseInt(fsCount) > 0 && (
+                  <div style={{ marginTop: 8, fontSize: 12, color: G, fontWeight: 600 }}>
+                    + {fmt(getFsBonus(fsCount))} bonus ({Math.min(parseInt(fsCount), 2)} file{Math.min(parseInt(fsCount), 2) > 1 ? "s" : ""} counted)
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {error && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff8e7", border: `1px solid ${Y}`, borderRadius: 10, padding: "10px 14px", marginBottom: 10 }}>
+                <span style={{ fontSize: 13, color: "#7a5500" }}>⚠ {error}</span>
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+              <button onClick={calculate} style={{ flex: 1, height: 46, background: G, color: "#fff", border: "none", borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+                Calculate Incentive
+              </button>
+              <button onClick={reset} title="Reset" style={{ width: 46, height: 46, background: "#fff", border: "1px solid #dde8de", borderRadius: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8fa88f" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              </button>
+            </div>
+
+            {/* Result */}
+            {result && (
+              <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #dde8de", overflow: "hidden" }}>
+                {/* Hero */}
+                <div style={{ background: "#edf7ee", padding: "24px 20px", textAlign: "center", borderBottom: "1px solid #dde8de" }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.7)", borderRadius: 20, padding: "3px 12px", marginBottom: 10 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={G} strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: G, letterSpacing: "0.07em", textTransform: "uppercase" }}>
+                      {result.role === "rm" ? "RM / DST / RO" : "SM / SRO"} · Incentive Payable
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 42, fontWeight: 800, color: result.total > 0 ? G : "#94a3b8", letterSpacing: "-0.02em" }}>
+                    {fmt(result.total)}
+                  </div>
+                  {result.total === 0 && <p style={{ fontSize: 12, color: "#8fa88f", marginTop: 6 }}>Below minimum slab — no incentive earned</p>}
+                </div>
+
+                {/* Slab + Weighted */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #eef4ef" }}>
+                  <div style={{ padding: "14px 16px", borderRight: "1px solid #eef4ef", textAlign: "center" }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Slab Qualified</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: result.slab ? Y : "#94a3b8" }}>{result.slab ? result.slab.label : "Below T1"}</div>
+                    <div style={{ fontSize: 11, color: "#8fa88f", marginTop: 2 }}>based on total CHO</div>
+                  </div>
+                  <div style={{ padding: "14px 16px", textAlign: "center" }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Weighted Business</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#1a2e1c" }}>{fmt(result.w)}</div>
+                    <div style={{ fontSize: 11, color: "#8fa88f", marginTop: 2 }}>payout base</div>
+                  </div>
+                </div>
+
+                {/* Breakdown */}
+                <div style={{ padding: "16px 20px" }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>Calculation Breakdown</div>
+                  {[
+                    { label: "Direct", weight: "×1.0", val: result.bd.d },
+                    { label: "Connector", weight: "×0.5", val: result.bd.c },
+                    { label: "Individual DSA", weight: "×0.25", val: result.bd.i },
+                    { label: "Corporate DSA", weight: "×0.10", val: result.bd.co },
+                  ].map((r, idx) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "1px solid #f3f7f3" }}>
+                      <span style={{ fontSize: 13, color: "#5a6a5c" }}>{r.label} <span style={{ fontSize: 11, color: "#b0c0b0" }}>{r.weight}</span></span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#1a2e1c" }}>{fmt(r.val)}</span>
+                    </div>
+                  ))}
+                  <Divider />
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a2e1c" }}>Weighted Business</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a2e1c" }}>{fmt(result.w)}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 12, color: "#8fa88f" }}>Base Incentive ({result.slab?.pct?.toFixed(2) || 0}%)</span>
+                    <span style={{ fontSize: 12, color: "#8fa88f" }}>{fmt(result.inc)}</span>
+                  </div>
+
+                  {(result.diBonus > 0 || result.fsBonus > 0) && (
+                    <>
+                      <Divider />
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Bonuses</div>
+                      {result.diBonus > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#5a6a5c", marginBottom: 4 }}>
+                          <span>First DI / Cheque cut</span>
+                          <span style={{ fontWeight: 600, color: G }}>+ ₹1,000</span>
+                        </div>
+                      )}
+                      {result.fsBonus > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#5a6a5c" }}>
+                          <span>Final Sanctions ({result.fsFiles} file{result.fsFiles > 1 ? "s" : ""} × ₹1,000)</span>
+                          <span style={{ fontWeight: 600, color: G }}>+ {fmt(result.fsBonus)}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div style={{ background: G2, borderTop: "1px solid #dde8de", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 11, color: "#8fa88f" }}>Slab on CHO · Payout on weighted business · Payable on clearance</span>
+                  <button onClick={copy} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: copied ? G : G, background: copied ? G2 : "#fff", border: `1px solid ${copied ? G : "#dde8de"}`, borderRadius: 8, padding: "5px 12px", cursor: "pointer", transition: "all 0.2s" }}>
+                    {copied ? (
+                      <>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
