@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PeopleHome Supervisor Incentive Calculator</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f3f7f3; min-height: 100vh; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const G = "#2d7a3a";
+    const Y = "#f5a800";
+    const G2 = "#edf7ee";
+
+    const BRANCHES = [
+      { name: "Agra", category: "B" },
+      { name: "Ahmedabad", category: "A" },
+      { name: "Ahmednagar", category: "C" },
+      { name: "Ajmer", category: "C" },
+      { name: "Ambala", category: "C" },
+      { name: "Amravati", category: "C" },
+      { name: "Amreli", category: "C" },
+      { name: "Aurangabad", category: "C" },
+      { name: "Ayodhya", category: "C" },
+      { name: "Azamgarh", category: "C" },
+      { name: "Bangalore", category: "A" },
+      { name: "Banswara", category: "C" },
+      { name: "Baran", category: "C" },
+      { name: "Belgaum", category: "C" },
+      { name: "Bharuch", category: "C" },
+      { name: "Bhavnagar", category: "C" },
+      { name: "Bhilwara", category: "C" },
+      { name: "Bhopal", category: "B" },
+      { name: "Bikaner", category: "C" },
+      { name: "Bilaspur", category: "C" },
+      { name: "Bulandshahr", category: "C" },
+      { name: "Chamarajanagar", category: "C" },
+      { name: "Chennai", category: "A" },
+      { name: "Chhindwara", category: "C" },
+      { name: "Chittorgarh", category: "C" },
+      { name: "Coimbatore", category: "B" },
+      { name: "Dabra", category: "C" },
+      { name: "Deesa", category: "C" },
+      { name: "Dehradun", category: "B" },
+      { name: "Delhi NCR", category: "A" },
+      { name: "Delhi NSP", category: "A" },
+      { name: "Deoli", category: "C" },
+      { name: "Eluru", category: "C" },
+      { name: "Faridabad", category: "A" },
+      { name: "Ghaziabad", category: "A" },
+      { name: "Godhra", category: "C" },
+      { name: "Gorakhpur", category: "C" },
+      { name: "Guna", category: "C" },
+      { name: "Gurgaon", category: "A" },
+      { name: "Gwalior", category: "B" },
+      { name: "Haridwar", category: "C" },
+      { name: "Himmatnagar", category: "C" },
+      { name: "Hisar", category: "B" },
+      { name: "Hosur", category: "C" },
+      { name: "Hubali", category: "C" },
+      { name: "Hyderabad", category: "A" },
+      { name: "Indore", category: "A" },
+      { name: "Jabalpur", category: "C" },
+      { name: "Jaipur", category: "A" },
+      { name: "Jalgaon", category: "C" },
+      { name: "Jalna", category: "C" },
+      { name: "Jaunpur", category: "C" },
+      { name: "Jhalawar", category: "C" },
+      { name: "Jhansi", category: "C" },
+      { name: "Jodhpur", category: "B" },
+      { name: "Kakinada", category: "C" },
+      { name: "Kalyan", category: "A" },
+      { name: "Kanpur", category: "B" },
+      { name: "Kareem Nagar", category: "C" },
+      { name: "Karnal", category: "B" },
+      { name: "Khammam", category: "C" },
+      { name: "Kolhapur", category: "B" },
+      { name: "Kota", category: "C" },
+      { name: "Kurukshetra", category: "B" },
+      { name: "Laxmi Nagar", category: "A" },
+      { name: "Lucknow", category: "A" },
+      { name: "Madurai", category: "B" },
+      { name: "Mahbubnagar", category: "B" },
+      { name: "Mandsaur", category: "C" },
+      { name: "Manesar", category: "B" },
+      { name: "Mathura", category: "C" },
+      { name: "Meerut", category: "B" },
+      { name: "Mehsana", category: "C" },
+      { name: "Mysore", category: "C" },
+      { name: "Nagaur", category: "C" },
+      { name: "Nagpur", category: "B" },
+      { name: "Narsinghpur", category: "C" },
+      { name: "Nashik", category: "B" },
+      { name: "Neem Ka Thana", category: "C" },
+      { name: "Neemuch", category: "C" },
+      { name: "Nellore", category: "B" },
+      { name: "Nimbahera", category: "C" },
+      { name: "Nizamabad", category: "B" },
+      { name: "Noida", category: "A" },
+      { name: "Panipat", category: "B" },
+      { name: "Panvel", category: "A" },
+      { name: "Pondicherry", category: "C" },
+      { name: "Prayagraj", category: "C" },
+      { name: "Pune", category: "A" },
+      { name: "Raipur", category: "B" },
+      { name: "Rajahmundry", category: "B" },
+      { name: "Rajkot", category: "B" },
+      { name: "Ramanagara", category: "C" },
+      { name: "Ratlam", category: "C" },
+      { name: "Rewa", category: "C" },
+      { name: "Rohtak", category: "C" },
+      { name: "Roorkee", category: "C" },
+      { name: "Sagar", category: "C" },
+      { name: "Sahakarnagar", category: "A" },
+      { name: "Saharanpur", category: "C" },
+      { name: "Salem", category: "C" },
+      { name: "Sangli", category: "C" },
+      { name: "Satara", category: "C" },
+      { name: "Satna", category: "C" },
+      { name: "Shahpura", category: "C" },
+      { name: "Sonipat", category: "C" },
+      { name: "Surat", category: "B" },
+      { name: "Surendranagar", category: "C" },
+      { name: "Suryapet", category: "B" },
+      { name: "Thiruvallur", category: "C" },
+      { name: "Tiruchirappalli", category: "B" },
+      { name: "Tirupathi", category: "C" },
+      { name: "Tirupattur", category: "C" },
+      { name: "Udaipur", category: "B" },
+      { name: "Ujjain", category: "C" },
+      { name: "Vadodara", category: "B" },
+      { name: "Varanasi", category: "B" },
+      { name: "Vellore", category: "C" },
+      { name: "Vidisha", category: "C" },
+      { name: "Vijayawada", category: "A" },
+      { name: "Vijaywada", category: "A" },
+      { name: "Virar", category: "A" },
+      { name: "Visakhapatnam", category: "B" },
+      { name: "Vizianagaram", category: "C" },
+      { name: "Warangal", category: "B" },
+      { name: "Yamuna Nagar", category: "C" },
+      { name: "Zirakpur", category: "B" },
+    ];
+
+    const SLAB_STRUCTURE = {
+      A: [
+        { min: 7500000,  max: 9999999,  amount: 25000, tier: "T1", label: "T1 · ₹75L – ₹99.99L" },
+        { min: 10000000, max: Infinity, amount: 30000, tier: "T2", label: "T2 · ₹1Cr+" },
+      ],
+      B: [
+        { min: 5000000, max: 7499999,  amount: 20000, tier: "T1", label: "T1 · ₹50L – ₹74.99L" },
+        { min: 7500000, max: Infinity, amount: 25000, tier: "T2", label: "T2 · ₹75L+" },
+      ],
+      C: [
+        { min: 4000000, max: 5999999,  amount: 15000, tier: "T1", label: "T1 · ₹40L – ₹59.99L" },
+        { min: 6000000, max: Infinity, amount: 20000, tier: "T2", label: "T2 · ₹60L+" },
+      ],
+    };
+
+    function getSlab(category, cho) {
+      const slabs = SLAB_STRUCTURE[category];
+      if (!slabs) return null;
+      for (let s of [...slabs].reverse()) {
+        if (cho >= s.min) return s;
+      }
+      return null;
+    }
+
+    const fmt = (n) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+    const parse = (v) => parseFloat((v || "0").toString().replace(/,/g, "")) || 0;
+
+    const formatMoney = (v) => {
+      if (!v) return "";
+      const n = v.toString().replace(/,/g, "");
+      if (isNaN(n)) return v;
+      return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n);
+    };
+
+    const SectionLabel = ({ children }) => (
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>{children}</div>
+    );
+
+    const Divider = () => <div style={{ height: 1, background: "#eef4ef", margin: "12px 0" }} />;
+
+    const CategoryBadge = ({ cat }) => {
+      const colors = { A: { bg: "#e8f5e9", color: G, border: "#a5d6a7" }, B: { bg: "#fff8e1", color: "#c67b00", border: "#ffe082" }, C: { bg: "#f3f4f6", color: "#4b5563", border: "#d1d5db" } };
+      const c = colors[cat] || colors.C;
+      return (
+        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>
+          Category {cat}
+        </span>
+      );
+    };
+
+    function BranchSearch({ value, onChange, onSelect }) {
+      const [open, setOpen] = React.useState(false);
+      const [query, setQuery] = React.useState(value ? value.name : "");
+      const ref = React.useRef(null);
+
+      const filtered = query.length > 0
+        ? BRANCHES.filter(b => b.name.toLowerCase().includes(query.toLowerCase()))
+        : [];
+
+      React.useEffect(() => {
+        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+      }, []);
+
+      const handleInput = (e) => {
+        setQuery(e.target.value);
+        setOpen(true);
+        if (!e.target.value) { onChange(null); }
+      };
+
+      const handleSelect = (branch) => {
+        setQuery(branch.name);
+        setOpen(false);
+        onSelect(branch);
+      };
+
+      const handleClear = () => {
+        setQuery("");
+        setOpen(false);
+        onSelect(null);
+      };
+
+      return (
+        <div ref={ref} style={{ position: "relative" }}>
+          <div style={{ position: "relative" }}>
+            <svg style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8fa88f" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input
+              type="text"
+              value={query}
+              onChange={handleInput}
+              onFocus={() => query.length > 0 && setOpen(true)}
+              placeholder="Search branch..."
+              style={{
+                width: "100%", height: 42, paddingLeft: 34, paddingRight: query ? 34 : 14,
+                border: value ? `1.5px solid ${G}` : "1px solid #dde8de",
+                borderRadius: 8, background: value ? G2 : "#f7faf7",
+                fontSize: 14, color: "#1a2e1c", outline: "none"
+              }}
+            />
+            {query && (
+              <button onClick={handleClear} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#8fa88f", fontSize: 16, lineHeight: 1 }}>×</button>
+            )}
+          </div>
+          {open && filtered.length > 0 && (
+            <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#fff", border: "1px solid #dde8de", borderRadius: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", zIndex: 100, maxHeight: 220, overflowY: "auto" }}>
+              {filtered.map(b => (
+                <div key={b.name} onMouseDown={() => handleSelect(b)}
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", cursor: "pointer", borderBottom: "1px solid #f3f7f3", fontSize: 13, color: "#1a2e1c" }}
+                  onMouseEnter={e => e.currentTarget.style.background = G2}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <span>{b.name}</span>
+                  <CategoryBadge cat={b.category} />
+                </div>
+              ))}
+            </div>
+          )}
+          {open && filtered.length === 0 && query.length > 0 && (
+            <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#fff", border: "1px solid #dde8de", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#8fa88f", zIndex: 100 }}>
+              No branch found
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function App() {
+      const [branch, setBranch] = React.useState(null);
+      const [cho, setCho] = React.useState("");
+      const [resolution, setResolution] = React.useState(null);
+      const [result, setResult] = React.useState(null);
+      const [error, setError] = React.useState("");
+
+      const handleChoInput = (e) => {
+        const raw = e.target.value.replace(/,/g, "");
+        if (/^\d*$/.test(raw)) setCho(raw);
+      };
+
+      const calculate = () => {
+        setError(""); setResult(null);
+        if (!branch) { setError("Please select a branch."); return; }
+        const choVal = parse(cho);
+        if (!choVal) { setError("Please enter the CHO amount."); return; }
+        if (!resolution) { setError("Please select the collection resolution."); return; }
+
+        const slab = getSlab(branch.category, choVal);
+        const resLabel = resolution === "full" ? "100%" : resolution === "partial" ? "90–99%" : "< 90%";
+        if (!slab) {
+          setResult({ branch, category: branch.category, cho: choVal, slab: null, base: 0, resVal: resLabel, penalty: "none", final: 0 });
+          return;
+        }
+
+        let penalty = "none";
+        let final = slab.amount;
+        if (resolution === "zero") { penalty = "zero"; final = 0; }
+        else if (resolution === "partial") { penalty = "80pct"; final = Math.round(slab.amount * 0.8); }
+
+        setResult({ branch, category: branch.category, cho: choVal, slab, base: slab.amount, resVal: resLabel, penalty, final });
+      };
+
+      const reset = () => {
+        setBranch(null); setCho(""); setResolution(null); setResult(null); setError("");
+      };
+
+      return (
+        <div style={{ minHeight: "100vh", background: "#f3f7f3", padding: "20px 16px" }}>
+          <div style={{ maxWidth: 540, margin: "0 auto" }}>
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                  <div style={{ background: G, borderRadius: 8, padding: "6px 8px", display: "flex", alignItems: "center" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8M8 12h5M8 17h3"/></svg>
+                  </div>
+                  <span style={{ fontSize: 17, fontWeight: 700, color: "#1a2e1c" }}>Supervisor Incentive</span>
+                </div>
+                <p style={{ fontSize: 12, color: "#8fa88f", margin: 0, paddingLeft: 40 }}>ABM / BM / RM / SM & BCM / CM Incentive Structure</p>
+              </div>
+              <img src="Logo.png" alt="PeopleHome" style={{ height: 40, objectFit: "contain" }} />
+            </div>
+
+            {/* Main Card */}
+            <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #dde8de", overflow: "hidden", marginBottom: 12 }}>
+
+              {/* Branch */}
+              <div style={{ padding: "18px 20px", background: G2, borderBottom: "1px solid #dde8de" }}>
+                <SectionLabel>Branch Location</SectionLabel>
+                <BranchSearch value={branch} onSelect={setBranch} />
+                {branch && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={G} strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span style={{ fontSize: 12, color: G, fontWeight: 600 }}>{branch.name}</span>
+                    <CategoryBadge cat={branch.category} />
+                  </div>
+                )}
+              </div>
+
+              {/* CHO */}
+              <div style={{ padding: "18px 20px", borderBottom: "1px solid #eef4ef" }}>
+                <SectionLabel>Cheque Handover Business</SectionLabel>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontWeight: 700, fontSize: 14 }}>₹</span>
+                  <input
+                    type="text" inputMode="numeric"
+                    value={formatMoney(cho)}
+                    onChange={handleChoInput}
+                    placeholder="0"
+                    style={{
+                      width: "100%", height: 40, paddingLeft: 26, paddingRight: 10,
+                      border: "1px solid #dde8de", borderRadius: 8, background: "#f7faf7",
+                      fontSize: 14, color: "#1a2e1c", outline: "none"
+                    }}
+                  />
+                </div>
+                <p style={{ fontSize: 11, color: G, marginTop: 6, marginBottom: 0, fontWeight: 500 }}>Determines your payout slab</p>
+              </div>
+
+              {/* Resolution */}
+              <div style={{ padding: "18px 20px" }}>
+                <SectionLabel>Collection Resolution</SectionLabel>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[
+                    { key: "full",    label: "100%",   color: G,         bg: G2,         border: G },
+                    { key: "partial", label: "90–99%", color: "#c97b00", bg: "#fff8e7",  border: "#c97b00" },
+                    { key: "zero",    label: "< 90%",  color: "#b91c1c", bg: "#fff1f1",  border: "#b91c1c" },
+                  ].map(r => (
+                    <button
+                      key={r.key}
+                      onClick={() => setResolution(r.key)}
+                      style={{
+                        flex: 1, padding: "11px 8px", textAlign: "center",
+                        background: resolution === r.key ? r.bg : "#f7faf7",
+                        border: resolution === r.key ? `2px solid ${r.border}` : "1.5px solid #dde8de",
+                        borderRadius: 8, cursor: "pointer",
+                        fontSize: 13, fontWeight: 700,
+                        color: resolution === r.key ? r.color : "#94a3b8",
+                        transition: "all 0.15s"
+                      }}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff8e7", border: `1px solid ${Y}`, borderRadius: 10, padding: "10px 14px", marginBottom: 10 }}>
+                <span style={{ fontSize: 13, color: "#7a5500" }}>⚠ {error}</span>
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+              <button onClick={calculate} style={{ flex: 1, height: 46, background: G, color: "#fff", border: "none", borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+                Calculate Incentive
+              </button>
+              <button onClick={reset} title="Reset" style={{ width: 46, height: 46, background: "#fff", border: "1px solid #dde8de", borderRadius: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8fa88f" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              </button>
+            </div>
+
+            {/* Result */}
+            {result && (
+              <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #dde8de", overflow: "hidden" }}>
+
+                {/* Hero */}
+                <div style={{ background: G2, padding: "24px 20px", textAlign: "center", borderBottom: "1px solid #dde8de" }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.7)", borderRadius: 20, padding: "3px 12px", marginBottom: 10 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={G} strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: G, letterSpacing: "0.07em", textTransform: "uppercase" }}>
+                      {result.branch.name} · Category {result.category} · Incentive Payable
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 42, fontWeight: 800, color: result.final > 0 ? G : "#94a3b8", letterSpacing: "-0.02em" }}>
+                    {fmt(result.final)}
+                  </div>
+                  {result.penalty === "zero" && (
+                    <p style={{ fontSize: 12, color: "#b91c1c", marginTop: 6, fontWeight: 600 }}>Resolution below 90% — no incentive payable</p>
+                  )}
+                  {!result.slab && (
+                    <p style={{ fontSize: 12, color: "#8fa88f", marginTop: 6 }}>Below minimum slab — no incentive earned</p>
+                  )}
+                </div>
+
+                {/* Slab + Category */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #eef4ef" }}>
+                  <div style={{ padding: "14px 16px", borderRight: "1px solid #eef4ef", textAlign: "center" }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Slab Qualified</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: result.slab ? Y : "#94a3b8" }}>{result.slab ? result.slab.tier : "Below T1"}</div>
+                    <div style={{ fontSize: 11, color: "#8fa88f", marginTop: 2 }}>{result.slab ? result.slab.label : "No incentive"}</div>
+                  </div>
+                  <div style={{ padding: "14px 16px", textAlign: "center" }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Branch Category</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#1a2e1c" }}>Category {result.category}</div>
+                    <div style={{ fontSize: 11, color: "#8fa88f", marginTop: 2 }}>{result.branch.name}</div>
+                  </div>
+                </div>
+
+                {/* Breakdown */}
+                <div style={{ padding: "16px 20px" }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>Calculation Breakdown</div>
+
+                  {[
+                    { label: "CHO Amount", val: fmt(result.cho) },
+                    { label: "Branch Category", val: `Category ${result.category}` },
+                    { label: "Slab", val: result.slab ? result.slab.label : "Below T1" },
+                    { label: "Base Incentive", val: fmt(result.base) },
+                  ].map((r, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "1px solid #f3f7f3" }}>
+                      <span style={{ fontSize: 13, color: "#5a6a5c" }}>{r.label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#1a2e1c" }}>{r.val}</span>
+                    </div>
+                  ))}
+
+                  <Divider />
+
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, color: "#5a6a5c" }}>Collection Resolution</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: result.penalty === "zero" ? "#b91c1c" : result.penalty === "80pct" ? "#c97b00" : G }}>
+                      {result.resVal}%
+                    </span>
+                  </div>
+
+                  {result.penalty === "80pct" && (
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 13, color: "#c97b00" }}>Penalty (20% deduction)</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#c97b00" }}>− {fmt(result.base - result.final)}</span>
+                    </div>
+                  )}
+                  {result.penalty === "zero" && (
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 13, color: "#b91c1c" }}>Resolution &lt; 90% — full forfeiture</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#b91c1c" }}>− {fmt(result.base)}</span>
+                    </div>
+                  )}
+
+                  <Divider />
+
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e1c" }}>Final Incentive Payable</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: result.final > 0 ? G : "#94a3b8" }}>{fmt(result.final)}</span>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div style={{ background: G2, borderTop: "1px solid #dde8de", padding: "10px 16px" }}>
+                  <div style={{ fontSize: 11, color: "#8fa88f", marginBottom: 10 }}>Slab on CHO · Payable on clearance · No incentive below T1</div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start", background: "#fffbeb", border: "1px solid #f5a800", borderRadius: 10, padding: "10px 12px" }}>
+                    <span style={{ fontSize: 14, lineHeight: 1 }}>⚠️</span>
+                    <p style={{ fontSize: 11, color: "#7a5500", lineHeight: 1.6, margin: 0 }}>
+                      <strong>Disclaimer:</strong> This calculation is based on the provided input data; however, the final payout will be determined in accordance with the company's policy.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
