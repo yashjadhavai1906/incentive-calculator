@@ -102,7 +102,7 @@
       const [connector, setConnector] = React.useState("");
       const [idsa, setIdsa] = React.useState("");
       const [cdsa, setCdsa] = React.useState("");
-      const [di, setDi] = React.useState(false);
+      const [di, setDi] = React.useState(null);
       const [fsCount, setFsCount] = React.useState("");
       const [result, setResult] = React.useState(null);
       const [error, setError] = React.useState("");
@@ -208,15 +208,21 @@
               {/* Bonus */}
               <div style={{ padding: "18px 20px" }}>
                 <SectionLabel>Bonus Eligibility</SectionLabel>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: "#3d5140", fontWeight: 500 }}>DI / Cheque cut done this month?</div>
-                    {di && <div style={{ fontSize: 11, color: G, marginTop: 2 }}>+ ₹1,000 bonus</div>}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 13, color: "#3d5140", fontWeight: 500, marginBottom: 8 }}>DI / Cheque cut done this month?</div>
+                  <div style={{ display: "flex", gap: 20 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", fontSize: 13, color: "#3d5140", fontWeight: di === true ? 700 : 400 }}>
+                      <input type="radio" name="di" checked={di === true} onChange={() => setDi(true)}
+                        style={{ accentColor: G, width: 16, height: 16, cursor: "pointer" }} />
+                      Yes
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", fontSize: 13, color: "#3d5140", fontWeight: di === false ? 700 : 400 }}>
+                      <input type="radio" name="di" checked={di === false} onChange={() => setDi(false)}
+                        style={{ accentColor: G, width: 16, height: 16, cursor: "pointer" }} />
+                      No
+                    </label>
                   </div>
-                  <div style={{ display: "flex", gap: 3, background: "#eef4ef", padding: 3, borderRadius: 9, minWidth: 100 }}>
-                    <ToggleBtn active={di} onClick={() => setDi(true)}>Yes</ToggleBtn>
-                    <ToggleBtn active={!di} onClick={() => setDi(false)}>No</ToggleBtn>
-                  </div>
+                  {di === true && <div style={{ fontSize: 11, color: G, marginTop: 6, fontWeight: 600 }}>+ ₹1,000 bonus</div>}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ flex: 1 }}>
@@ -271,9 +277,10 @@
                     </span>
                   </div>
                   <div style={{ fontSize: 42, fontWeight: 800, color: result.total > 0 ? G : "#94a3b8", letterSpacing: "-0.02em" }}>
-                    {fmt(result.total)}
+                    {fmt(result.total)}*
                   </div>
                   {result.total === 0 && <p style={{ fontSize: 12, color: "#8fa88f", marginTop: 6 }}>Below minimum slab — no incentive earned</p>}
+                  {result.total > 0 && <p style={{ fontSize: 11, color: "#8fa88f", marginTop: 8, lineHeight: 1.5, maxWidth: 380, margin: "8px auto 0" }}>*This calculation is based on the provided input data; however, the final payout will be determined in accordance with the company's policy.</p>}
                 </div>
 
                 {/* Slab + Weighted */}
@@ -335,21 +342,8 @@
                 </div>
 
                 {/* Footer */}
-                <div style={{ background: G2, borderTop: "1px solid #dde8de", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ background: G2, borderTop: "1px solid #dde8de", padding: "10px 16px" }}>
                   <span style={{ fontSize: 11, color: "#8fa88f" }}>Slab on CHO · Payout on weighted business · Payable on clearance</span>
-                  <button onClick={copy} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: copied ? G : G, background: copied ? G2 : "#fff", border: `1px solid ${copied ? G : "#dde8de"}`, borderRadius: 8, padding: "5px 12px", cursor: "pointer", transition: "all 0.2s" }}>
-                    {copied ? (
-                      <>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                        Copy
-                      </>
-                    )}
-                  </button>
                 </div>
               </div>
             )}
