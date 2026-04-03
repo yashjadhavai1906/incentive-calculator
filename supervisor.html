@@ -437,17 +437,12 @@
                   )}
                 </div>
 
-                {/* Slab + Category */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #eef4ef" }}>
-                  <div style={{ padding: "14px 16px", borderRight: "1px solid #eef4ef", textAlign: "center" }}>
+                {/* Slab */}
+                <div style={{ borderBottom: "1px solid #eef4ef" }}>
+                  <div style={{ padding: "14px 16px", textAlign: "center" }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Slab Qualified</div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: result.slab ? Y : "#94a3b8" }}>{result.slab ? result.slab.tier : "Below T1"}</div>
                     <div style={{ fontSize: 11, color: "#8fa88f", marginTop: 2 }}>{result.slab ? result.slab.label : "No incentive"}</div>
-                  </div>
-                  <div style={{ padding: "14px 16px", textAlign: "center" }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#8fa88f", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Branch Category</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#1a2e1c" }}>Category {result.category}</div>
-                    <div style={{ fontSize: 11, color: "#8fa88f", marginTop: 2 }}>{result.branch.name}</div>
                   </div>
                 </div>
 
@@ -457,7 +452,6 @@
 
                   {[
                     { label: "CHO Amount", val: fmt(result.cho) },
-                    { label: "Slab", val: result.slab ? result.slab.label : "Below T1" },
                     { label: "Base Incentive", val: fmt(result.base) },
                   ].map((r, i) => (
                     <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "1px solid #f3f7f3" }}>
@@ -471,7 +465,7 @@
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                     <span style={{ fontSize: 13, color: "#5a6a5c" }}>Collection Resolution</span>
                     <span style={{ fontSize: 13, fontWeight: 600, color: result.penalty === "zero" ? "#b91c1c" : result.penalty === "80pct" ? "#c97b00" : G }}>
-                      {result.resVal}%
+                      {result.resVal}
                     </span>
                   </div>
 
@@ -490,13 +484,16 @@
 
                   <Divider />
 
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e1c" }}>Final Incentive Payable BM/RM/SM</span>
-                    <span style={{ fontSize: 14, fontWeight: 800, color: result.final > 0 ? G : "#94a3b8" }}>{fmt(result.final)}</span>
+                  <div style={{ marginBottom: 2 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e1c" }}>Final Incentive Payable</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, color: "#5a6a5c", paddingLeft: 8 }}>BM / RM / SM</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: result.final > 0 ? G : "#94a3b8" }}>{fmt(result.final)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e1c" }}>Final Incentive Payable BCM/CM</span>
-                    <span style={{ fontSize: 14, fontWeight: 800, color: result.final > 0 ? G : "#94a3b8" }}>{fmt(result.final)}</span>
+                    <span style={{ fontSize: 13, color: "#5a6a5c", paddingLeft: 8 }}>BCM / CM</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: result.final > 0 ? G : "#94a3b8" }}>{fmt(result.final)}</span>
                   </div>
                 </div>
 
