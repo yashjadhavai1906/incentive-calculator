@@ -423,9 +423,7 @@
                 <div style={{ background: G2, padding: "24px 20px", textAlign: "center", borderBottom: "1px solid #dde8de" }}>
                   <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.7)", borderRadius: 20, padding: "3px 12px", marginBottom: 10 }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={G} strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: G, letterSpacing: "0.07em", textTransform: "uppercase" }}>
-                      {result.branch.name} · Category {result.category} · Incentive Payable
-                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: G, letterSpacing: "0.07em", textTransform: "uppercase" }}>Incentive Payable</span>
                   </div>
                   <div style={{ fontSize: 42, fontWeight: 800, color: result.final > 0 ? G : "#94a3b8", letterSpacing: "-0.02em" }}>
                     {fmt(result.final)}
@@ -458,7 +456,6 @@
 
                   {[
                     { label: "CHO Amount", val: fmt(result.cho) },
-                    { label: "Branch Category", val: `Category ${result.category}` },
                     { label: "Slab", val: result.slab ? result.slab.label : "Below T1" },
                     { label: "Base Incentive", val: fmt(result.base) },
                   ].map((r, i) => (
@@ -492,8 +489,12 @@
 
                   <Divider />
 
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e1c" }}>Final Incentive Payable BM/RM/SM</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: result.final > 0 ? G : "#94a3b8" }}>{fmt(result.final)}</span>
+                  </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e1c" }}>Final Incentive Payable</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e1c" }}>Final Incentive Payable BCM/CM</span>
                     <span style={{ fontSize: 14, fontWeight: 800, color: result.final > 0 ? G : "#94a3b8" }}>{fmt(result.final)}</span>
                   </div>
                 </div>
